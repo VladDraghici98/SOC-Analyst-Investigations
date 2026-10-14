@@ -61,3 +61,6 @@ Initiated immediate device containment/isolation for Ellen's endpoint to prevent
 Purged and deleted the malicious email from the recipient mailbox and blocked the sender address at the email gateway.
 
 Blocked the malicious domain (blockchainjobhub[.]com) and IP (152.89.61.96) at the perimeter firewall/proxy.
+[Email Metadata]
+<img width="1228" height="98" alt="Capturegithub1" src="https://github.com/user-attachments/assets/96ffb652-82d3-4ce5-a9d7-8da2f5271f9a" />
+
