@@ -1,0 +1,47 @@
+Executive Summary
+Alert Title: SOC325 - Unauthorized Cloud Region Access Attempt Detected
+
+Event ID: 303
+
+Event Date/Time: 2024-09-24T08:21:15+03:00
+
+Severity: Low
+
+Category: Web Attack / Defense Evasion
+
+Target System: 52.15.206.21 (Ubuntu 20.04.02 LTS)
+
+Target Account: test@letsdefend.io
+
+Attacker Source IP: 134.209.145.73 (Located in a restricted cloud region - India)
+
+Verdict: True Positive (Blocked)
+
+Investigation Overview
+1. Alert Summary and Trigger Analysis
+The SIEM generated an alert triggered by a high volume of access attempts against the authentication endpoint (POST /accounts/login) using the account test@letsdefend.io. The traffic originated from an external IP address (134.209.145.73) located in a cloud region configured in the organization policy as Unused or Unsupported.
+
+2. Threat Intelligence and Reputation Check (IOC Analysis)
+Source IP: 134.209.145.73
+
+Reputation Check (VirusTotal / AbuseIPDB): Verified as Malicious. The IP is flagged for active brute-force attacks, SSH scanning, and malicious web application probes.
+
+Geofencing and Cloud Region: The IP originates from a restricted cloud infrastructure region in India.
+
+3. Traffic and Impact Analysis
+HTTP Request: POST /accounts/login HTTP/1.1
+
+HTTP Status Code and Action: 403 Forbidden / Blocked
+
+Log Correlation: Reviewing network and proxy logs confirmed that all incoming requests from 134.209.145.73 were successfully blocked by perimeter firewalls and security controls. No successful authentication or system compromise occurred.
+
+Scope Determination: Search on SIEM and log management showed that only the target server (52.15.206.21) was targeted by this IP. No internal lateral movement or wider impact was observed.
+
+Key Takeaways and Playbook Insights
+Host Isolation Status: No Isolation Required
+
+Rationale: Although the intent was malicious (True Positive), the firewall and proxy successfully dropped all requests (403 Blocked). The host was never compromised.
+
+Defense Evasion Technique (T1535):
+
+Attackers frequently leverage obscure or restricted cloud provider regions hoping that defenders lack proper logging or monitoring rules for traffic originating from those zones.
