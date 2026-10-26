@@ -1,0 +1,64 @@
+# CyberDefenders – IcedID Threat Intelligence Investigation
+
+## Overview
+
+I completed the IcedID challenge on CyberDefenders, a hands-on blue-team lab focused on threat intelligence and malware investigation.
+
+The objective was to investigate a malware sample, identify its associated file and payload, analyze its network infrastructure, research the related threat actor, and understand how the malware downloads additional payloads during execution.
+
+## Tools and Resources
+
+- **VirusTotal** – Investigated file hashes, domain relationships, and domain registration information.
+- **Tria.ge** – Reviewed sandbox analysis to understand malware execution and payload download behavior.
+- **MITRE ATT&CK** – Researched the threat actor associated with IcedID.
+- **CyberDefenders** – Completed the threat intelligence investigation.
+
+## Investigation Process and Findings
+
+### 1. Initial File Identification
+
+I investigated the provided file hash and identified the associated file as `document-1982481273.xlsm`.
+
+This helped establish the starting point for researching the malware sample and its associated indicators.
+
+### 2. Payload Identification
+
+During the investigation, I identified `3003.gif` as the GIF filename associated with the malware's additional payload delivery process.
+
+### 3. Network Infrastructure Analysis
+
+I investigated the domains queried by the malware to retrieve the additional payload during the second quarter. The analysis identified **five domains** involved in this activity.
+
+### 4. Domain Registration Investigation
+
+I reviewed the related domains in VirusTotal and compared their registration details. The investigation identified **Namecheap** as the common domain registrar associated with the relevant infrastructure.
+
+### 5. Threat Actor Attribution
+
+Using threat intelligence resources and MITRE ATT&CK, I identified **GOLD CABIN** as the threat actor association reported for this challenge.
+
+This step helped me understand how malware family research can be used to investigate relationships between malware and tracked threat groups.
+
+### 6. Malware Execution Analysis
+
+I reviewed the Tria.ge sandbox report to investigate the malware's execution behavior and identify the Windows API function associated with downloading additional payloads.
+
+The function identified was `URLDownloadToFileA`, which can download a file from a URL and save it to a specified local file path.
+
+## Skills Practiced
+
+- Threat intelligence research
+- File hash and malware identification
+- Indicator of Compromise (IOC) analysis
+- Malicious domain and infrastructure investigation
+- Domain registrar research
+- Threat actor attribution
+- Sandbox report analysis
+- Windows API behavior analysis
+- Malware payload delivery investigation
+- Cross-referencing multiple threat intelligence sources
+
+
+
+
+
